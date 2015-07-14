@@ -3,8 +3,8 @@ ROOT_LIB:=`root-config --libs --glibs`
 ROOT_FLAGS:=`root-config --cflags --ldflags`
 ROOT_INCLUDE:=`root-config --incdir`
 
-DEPS= interface/setOutputTree.h interface/setInputTree.h
-DEPS_OBJ= lib/setOutputTree.o lib/setInputTree.o
+DEPS= interface/setInputTree.h
+DEPS_OBJ= lib/setInputTree.o
 
 CC = g++
 CFLAGS = -Wall

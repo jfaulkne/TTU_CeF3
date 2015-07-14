@@ -29,7 +29,6 @@
 #include "TLorentzVector.h"
 
 #include "../interface/setInputTree.h"
-#include "../interface/setOutputTree.h"
 #include "../interface/tools.h"
 
 using namespace std;
@@ -55,14 +54,12 @@ int main (int argc, char** argv)
   //---------output tree----------------
   TFile* outROOT = TFile::Open((std::string("output/")+outputFile).c_str(),"recreate");
   outROOT->cd();
-  TTree* outTree = new TTree("otree", "otree");
-  outTree->SetDirectory(0);
 
-  setOutputTree *OutputTree = new setOutputTree(outTree);
   set<string> CH_hist_Set;
 
   Int_t maxTS = 1000;
   Int_t maxCH = 9;
+  Int_t maxPlot = 100;
 
   Long64_t maxEvt = DataTree->fChain->GetEntries();
   maxEvt = ((Long64_t)std::atof(numberOfEntries.c_str()) > maxEvt || (Long64_t)std::atof(numberOfEntries.c_str()) <= 0)?
@@ -80,9 +77,6 @@ int main (int argc, char** argv)
 
     if(iEntry % 1000 == 0)    
       cout << "Read entry: " << iEntry << endl;
-
-    // Initialize all variables
-    OutputTree->initializeVariables();
 
     Double_t Signal[maxCH][maxTS];
     Double_t TimeSlice[maxCH][maxTS];
@@ -114,16 +108,14 @@ int main (int argc, char** argv)
 
     }// End loop over digi samples
 
-    for (Int_t CH = 0; CH < maxCH; CH++){
+    if ((Int_t)jentry < maxPlot)
+      for (Int_t CH = 0; CH < maxCH; CH++){
 
-      TGraph* CH_pulse = new TGraph(maxTS, &TimeSlice[CH][0], &Signal[CH][0]);
-      CH_pulse->SetName(Form("CH%d",CH));
-      mg[CH]->Add(CH_pulse);
+        TGraph* CH_pulse = new TGraph(maxTS, &TimeSlice[CH][0], &Signal[CH][0]);
+        CH_pulse->SetName(Form("CH%d",CH));
+        mg[CH]->Add(CH_pulse);
 
-    }// End loop over channels
-
-    //fill the tree
-    outTree->Fill();
+      }// End loop over channels
 
   }// End loop over events
 
@@ -136,7 +128,7 @@ int main (int argc, char** argv)
 
     canvas[CH] = new TCanvas(Form("CH%d",CH), Form("Channel %d Pulses (%d Events)", CH, (Int_t)maxEvt), 600, 400);
     mg[CH]->Draw("APL");
-    mg[CH]->SetTitle(Form("CH%d (%d Events)",CH,(Int_t)maxEvt));
+    mg[CH]->SetTitle(Form("CH%d (%d Events)",CH,(maxPlot < (Int_t)maxEvt)? maxPlot:(Int_t)maxEvt));
     mg[CH]->GetXaxis()->SetTitle("Time Slice");
     mg[CH]->GetYaxis()->SetTitle("Signal");
     canvas[CH]->Write();
@@ -145,7 +137,6 @@ int main (int argc, char** argv)
 
   //--------close everything-------------
   DataTree->fChain->Delete();
-  outTree->Write();
   outROOT->Close();
 
   return(0);
