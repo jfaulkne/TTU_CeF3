@@ -1,0 +1,137 @@
+******************************************************************************
+*Tree    :H4tree    : H4 testbeam tree                                       *
+*Entries :    24502 : Total =      5454943501 bytes  File  Size =  978390862 *
+*        :          : Tree compression factor =   5.58                       *
+******************************************************************************
+*Br    0 :runNumber : runNumber/i                                            *
+*Entries :    24502 : Total  Size=     103610 bytes  File Size  =       6421 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  15.92     *
+*............................................................................*
+*Br    1 :spillNumber : spillNumber/i                                        *
+*Entries :    24502 : Total  Size=     103726 bytes  File Size  =       6484 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  15.78     *
+*............................................................................*
+*Br    2 :evtNumber : evtNumber/i                                            *
+*Entries :    24502 : Total  Size=     103610 bytes  File Size  =      40818 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   2.50     *
+*............................................................................*
+*Br    3 :evtTimeDist : evtTimeDist/i                                        *
+*Entries :    24502 : Total  Size=     103726 bytes  File Size  =       6244 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  16.39     *
+*............................................................................*
+*Br    4 :evtTimeStart : evtTimeStart/i                                      *
+*Entries :    24502 : Total  Size=     103784 bytes  File Size  =       6298 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  16.26     *
+*............................................................................*
+*Br    5 :nEvtTimes : nEvtTimes/i                                            *
+*Entries :    24502 : Total  Size=     103610 bytes  File Size  =       6360 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  16.07     *
+*............................................................................*
+*Br    6 :evtTime   : evtTime[nEvtTimes]/l                                   *
+*Entries :    24502 : Total  Size=     496073 bytes  File Size  =     221687 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   2.23     *
+*............................................................................*
+*Br    7 :evtTimeBoard : evtTimeBoard[nEvtTimes]/i                           *
+*Entries :    24502 : Total  Size=     300332 bytes  File Size  =      37311 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   8.01     *
+*............................................................................*
+*Br    8 :nAdcChannels : nAdcChannels/i                                      *
+*Entries :    24502 : Total  Size=     103784 bytes  File Size  =       6549 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  15.63     *
+*............................................................................*
+*Br    9 :adcBoard  : adcBoard[nAdcChannels]/i                               *
+*Entries :    24502 : Total  Size=    4033551 bytes  File Size  =     113503 *
+*Baskets :      141 : Basket Size=      77824 bytes  Compression=  35.51     *
+*............................................................................*
+*Br   10 :adcChannel : adcChannel[nAdcChannels]/i                            *
+*Entries :    24502 : Total  Size=    4033841 bytes  File Size  =     115450 *
+*Baskets :      141 : Basket Size=      77824 bytes  Compression=  34.91     *
+*............................................................................*
+*Br   11 :adcData   : adcData[nAdcChannels]/i                                *
+*Entries :    24502 : Total  Size=    4033406 bytes  File Size  =    1455707 *
+*Baskets :      141 : Basket Size=      77824 bytes  Compression=   2.77     *
+*............................................................................*
+*Br   12 :nTdcChannels : nTdcChannels/i                                      *
+*Entries :    24502 : Total  Size=     103784 bytes  File Size  =      22002 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   4.65     *
+*............................................................................*
+*Br   13 :tdcBoard  : tdcBoard[nTdcChannels]/i                               *
+*Entries :    24502 : Total  Size=     595848 bytes  File Size  =      54170 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  10.97     *
+*............................................................................*
+*Br   14 :tdcChannel : tdcChannel[nTdcChannels]/i                            *
+*Entries :    24502 : Total  Size=     595964 bytes  File Size  =     128866 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   4.61     *
+*............................................................................*
+*Br   15 :tdcData   : tdcData[nTdcChannels]/i                                *
+*Entries :    24502 : Total  Size=     595790 bytes  File Size  =     356324 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   1.67     *
+*............................................................................*
+*Br   16 :nDigiSamples : nDigiSamples/i                                      *
+*Entries :    24502 : Total  Size=     103784 bytes  File Size  =       6549 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  15.63     *
+*............................................................................*
+*Br   17 :digiFrequency : digiFrequency[nDigiSamples]/i                      *
+*Entries :    24502 : Total  Size=  905716394 bytes  File Size  =    6565598 *
+*Baskets :    21602 : Basket Size=   25600000 bytes  Compression= 137.88     *
+*............................................................................*
+*Br   18 :digiGroup : digiGroup[nDigiSamples]/i                              *
+*Entries :    24502 : Total  Size=  905629970 bytes  File Size  =    6479181 *
+*Baskets :    21602 : Basket Size=   25600000 bytes  Compression= 139.71     *
+*............................................................................*
+*Br   19 :digiChannel : digiChannel[nDigiSamples]/i                          *
+*Entries :    24502 : Total  Size=  905673182 bytes  File Size  =    7776925 *
+*Baskets :    21602 : Basket Size=   25600000 bytes  Compression= 116.40     *
+*............................................................................*
+*Br   20 :digiSampleIndex : digiSampleIndex[nDigiSamples]/i                  *
+*Entries :    24502 : Total  Size=  905759606 bytes  File Size  =  263646561 *
+*Baskets :    21602 : Basket Size=   25600000 bytes  Compression=   3.43     *
+*............................................................................*
+*Br   21 :digiSampleValue : digiSample[nDigiSamples]/F                       *
+*Entries :    24502 : Total  Size=  905759598 bytes  File Size  =  682761509 *
+*Baskets :    21602 : Basket Size=   25600000 bytes  Compression=   1.33     *
+*............................................................................*
+*Br   22 :digiBoard : digiBoard[nDigiSamples]/i                              *
+*Entries :    24502 : Total  Size=  905629970 bytes  File Size  =    7006115 *
+*Baskets :    21602 : Basket Size=   25600000 bytes  Compression= 129.20     *
+*............................................................................*
+*Br   23 :nScalerWords : nScalerWords/i                                      *
+*Entries :    24502 : Total  Size=     103784 bytes  File Size  =       6522 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  15.70     *
+*............................................................................*
+*Br   24 :scalerWord : scalerWord[nScalerWords]/i                            *
+*Entries :    24502 : Total  Size=     888276 bytes  File Size  =     173026 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   5.13     *
+*............................................................................*
+*Br   25 :scalerBoard : scalerBoard[nScalerWords]/i                          *
+*Entries :    24502 : Total  Size=     888334 bytes  File Size  =      39909 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  22.22     *
+*............................................................................*
+*Br   26 :nPatterns : nPatterns/i                                            *
+*Entries :    24502 : Total  Size=     103610 bytes  File Size  =       6360 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  16.07     *
+*............................................................................*
+*Br   27 :pattern   : pattern[nPatterns]/i                                   *
+*Entries :    24502 : Total  Size=     888090 bytes  File Size  =     356867 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   2.48     *
+*............................................................................*
+*Br   28 :patternBoard : patternBoard[nPatterns]/i                           *
+*Entries :    24502 : Total  Size=     888380 bytes  File Size  =      48536 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  18.27     *
+*............................................................................*
+*Br   29 :patternChannel : patternChannel[nPatterns]/i                       *
+*Entries :    24502 : Total  Size=     888496 bytes  File Size  =      41758 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  21.24     *
+*............................................................................*
+*Br   30 :nTriggerWords : nTriggerWords/i                                    *
+*Entries :    24502 : Total  Size=     103842 bytes  File Size  =       6574 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=  15.58     *
+*............................................................................*
+*Br   31 :triggerWords : triggerWords[nTriggerWords]/i                       *
+*Entries :    24502 : Total  Size=     202340 bytes  File Size  =      39433 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   5.09     *
+*............................................................................*
+*Br   32 :triggerWordsBoard : triggerWordsBoard[nTriggerWords]/i             *
+*Entries :    24502 : Total  Size=     202630 bytes  File Size  =      39802 *
+*Baskets :       54 : Basket Size=      51200 bytes  Compression=   5.05     *
+*............................................................................*
