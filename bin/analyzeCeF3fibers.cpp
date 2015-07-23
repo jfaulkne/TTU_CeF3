@@ -56,12 +56,17 @@ int main (int argc, char** argv)
   TFile* outROOT = TFile::Open((string("output/")+outputFile).c_str(),"recreate");
   outROOT->cd();
 
-  set<string> CH_hist_Set, CH_hist_2d_Set, CH_hist_Pulse_Set;
+  set<string> CH_hist_Set, CH_hist_2d_Set, CH_hist_Pulse_Set, CH_hist_Integrals_Set;
 
   Int_t maxTS = 1000;
   Int_t maxCH = 9;
   Int_t maxPlot = 100;
   Int_t peaks_threshold = 3000;
+  Int_t BKG_cut = 100;
+  Int_t LDG_PK_Cut1 = 160;
+  Int_t LDG_PK_Cut2 = 200;
+  Int_t SCND_PK_Cut1 = 200;
+  Int_t SCND_PK_Cut2 = maxTS;
   bool graph_pulses[maxCH]; for (Int_t CH = 0; CH < maxCH; CH++) graph_pulses[CH] = false;
 
   Long64_t maxEvt = DataTree->fChain->GetEntries();
@@ -84,10 +89,14 @@ int main (int argc, char** argv)
     Double_t Signal[maxCH][maxTS];
     Double_t TimeSlice[maxCH][maxTS];
 
+    Double_t Background_avg[maxCH];
+    Double_t Peak_integral[maxCH][2];
+
     Int_t Npeaks[maxCH];
     bool Triggered[maxCH][2];
     for (Int_t CH = 0; CH < maxCH; CH++){
       Npeaks[CH] = 0; Triggered[CH][0] = false; Triggered[CH][1] = false;
+      Background_avg[CH] = 0; Peak_integral[CH][0] = 0; Peak_integral[CH][1] = 0;
     }
 
     // Loop over each digi sample:
@@ -120,7 +129,7 @@ int main (int argc, char** argv)
 
       if (!CH_hist_2d){
 
-        CH_hist_2d = new TH2D(histName_2d.c_str(), histName_2d.c_str(), maxTS, 0, maxTS, maxEvt, 0, maxEvt);
+        CH_hist_2d = new TH2D(histName_2d.c_str(), histName_2d.c_str(), maxTS, 0, maxTS, maxPlot, 0, maxPlot);
         CH_hist_2d->GetZaxis()->SetTitle("Signal");
         CH_hist_2d->GetXaxis()->SetTitle("Time Slice");
         CH_hist_2d->GetYaxis()->SetTitle("Event");
@@ -130,24 +139,24 @@ int main (int argc, char** argv)
       }
 
       CH_hist->AddBinContent(DataTree->digiSampleIndex[sample], DataTree->digiSampleValue[sample]/maxEvt);
-      CH_hist_2d->SetBinContent(DataTree->digiSampleIndex[sample], (Int_t)jentry, DataTree->digiSampleValue[sample]);
+      if ((Int_t)jentry < maxPlot)
+        CH_hist_2d->SetBinContent(DataTree->digiSampleIndex[sample], (Int_t)jentry, DataTree->digiSampleValue[sample]);
 
       Signal[DataTree->digiChannel[sample]][DataTree->digiSampleIndex[sample]] = DataTree->digiSampleValue[sample];
       TimeSlice[DataTree->digiChannel[sample]][DataTree->digiSampleIndex[sample]] = DataTree->digiSampleIndex[sample];
 
+      if (DataTree->digiSampleIndex[sample] < BKG_cut)
+        Background_avg[DataTree->digiChannel[sample]] += DataTree->digiSampleValue[sample]/BKG_cut;
+
+      else if (DataTree->digiSampleIndex[sample] > LDG_PK_Cut1 && DataTree->digiSampleIndex[sample] < LDG_PK_Cut2)
+        Peak_integral[DataTree->digiChannel[sample]][0] +=
+          (Background_avg[DataTree->digiChannel[sample]] - DataTree->digiSampleValue[sample]);
+
+      else if (DataTree->digiSampleIndex[sample] > SCND_PK_Cut1 && DataTree->digiSampleIndex[sample] < SCND_PK_Cut2)
+        Peak_integral[DataTree->digiChannel[sample]][1] += 
+          (Background_avg[DataTree->digiChannel[sample]] - DataTree->digiSampleValue[sample]);
+
     }// End loop over digi samples
-
-    if ((Int_t)jentry < maxPlot)
-      for (Int_t CH = 0; CH < maxCH; CH++){
-        if (Triggered[CH][1]){
-
-          TGraph* CH_pulse = new TGraph(maxTS, &TimeSlice[CH][0], &Signal[CH][0]);
-          CH_pulse->SetName(Form("CH%d",CH));
-          mg[CH]->Add(CH_pulse);
-          graph_pulses[CH] = true;
-
-        }
-      }// End loop over channels
 
     for (Int_t CH = 0; CH < maxCH; CH++){
 
@@ -166,8 +175,27 @@ int main (int argc, char** argv)
 
       }
 
-      if (Triggered[CH][0] && Triggered[CH][1]) Npeaks[CH] = 2;
-      else if (Triggered[CH][0] || Triggered[CH][1]) Npeaks[CH] = 1;
+      TH2D* CH_hist_Int = 0;
+      string histName_Int = inputFile.substr(inputFile.find("Run"),inputFile.find(".root")-inputFile.find("Run"));
+      histName_Int += "_Channel"+IntToString(CH)+"_Integrals";
+
+      CH_hist_Int = (TH2D*)gDirectory->GetList()->FindObject(histName_Int.c_str());
+      if (!CH_hist_Int){
+
+        CH_hist_Int = new TH2D(histName_Int.c_str(), histName_Int.c_str(), 1000, 0, 500000, 1000, 0, 50000);
+        CH_hist_Int->GetYaxis()->SetTitle("Leading Pulse Integral");
+        CH_hist_Int->GetXaxis()->SetTitle("Second Pulse Integral");
+        CH_hist_Int->Sumw2();
+        CH_hist_Integrals_Set.insert(histName_Int);
+
+      }
+
+      if (Triggered[CH][0] && Triggered[CH][1]){
+
+        Npeaks[CH] = 2;
+        CH_hist_Int->Fill(Peak_integral[CH][1], Peak_integral[CH][0]);
+
+      } else if (Triggered[CH][0] || Triggered[CH][1]) Npeaks[CH] = 1;
 
       CH_hist->Fill(Npeaks[CH]);
 
@@ -189,6 +217,8 @@ int main (int argc, char** argv)
   for (set<string>::const_iterator itr = CH_hist_Set.begin(); itr != CH_hist_Set.end(); ++itr)
     gDirectory->GetList()->FindObject(itr->c_str())->Write();
   for (set<string>::const_iterator itr = CH_hist_2d_Set.begin(); itr != CH_hist_2d_Set.end(); ++itr)
+    gDirectory->GetList()->FindObject(itr->c_str())->Write();
+  for (set<string>::const_iterator itr = CH_hist_Integrals_Set.begin(); itr != CH_hist_Integrals_Set.end(); ++itr)
     gDirectory->GetList()->FindObject(itr->c_str())->Write();
   for (set<string>::const_iterator itr = CH_hist_Pulse_Set.begin(); itr != CH_hist_Pulse_Set.end(); ++itr){
 
