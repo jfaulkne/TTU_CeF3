@@ -63,9 +63,10 @@ int main (int argc, char** argv)
   Int_t maxPlot = 100;
   Int_t peaks_threshold = 3000;
   Int_t BKG_cut = 100;
-  Int_t LDG_PK_Cut1 = 160;
+  Int_t TRG_cut = 175;
+  Int_t LDG_PK_Cut1 = 125;
   Int_t LDG_PK_Cut2 = 200;
-  Int_t SCND_PK_Cut1 = 200;
+  Int_t SCND_PK_Cut1 = 100;
   Int_t SCND_PK_Cut2 = maxTS;
   bool graph_pulses[maxCH]; for (Int_t CH = 0; CH < maxCH; CH++) graph_pulses[CH] = false;
 
@@ -73,8 +74,18 @@ int main (int argc, char** argv)
   maxEvt = ((Long64_t)atof(numberOfEntries.c_str()) > maxEvt || (Long64_t)atof(numberOfEntries.c_str()) <= 0)?
      maxEvt : (Long64_t)atof(numberOfEntries.c_str());
 
+  // File to write .txt file peak information:
+  ofstream CH_txt[maxCH];
+  
   TMultiGraph* mg[maxCH];
-  for (Int_t CH = 0; CH < maxCH; CH++) mg[CH] = new TMultiGraph();
+
+  for (Int_t CH = 0; CH < maxCH; CH++){
+
+    mg[CH] = new TMultiGraph();
+    CH_txt[CH].open ("output/Signal_vs_time_Channel"+IntToString(CH)+".txt");
+
+  }// End loop over channels
+
 
   //---------start loop on events------------
   for (Long64_t jentry = 0; jentry < maxEvt; jentry++) {
@@ -105,7 +116,7 @@ int main (int argc, char** argv)
       if (DataTree->digiGroup[sample] != 0) continue;
       if (DataTree->digiSampleIndex[sample] >= maxTS) continue;
       if (DataTree->digiSampleValue[sample] < peaks_threshold) Triggered[DataTree->digiChannel[sample]][0] = true;
-      if (DataTree->digiSampleIndex[sample] < 200 && Triggered[DataTree->digiChannel[sample]][0])
+      if (DataTree->digiSampleIndex[sample] < TRG_cut && Triggered[DataTree->digiChannel[sample]][0])
         Triggered[DataTree->digiChannel[sample]][1] = true;
 
       TH1F* CH_hist = 0;
@@ -148,11 +159,11 @@ int main (int argc, char** argv)
       if (DataTree->digiSampleIndex[sample] < BKG_cut)
         Background_avg[DataTree->digiChannel[sample]] += DataTree->digiSampleValue[sample]/BKG_cut;
 
-      else if (DataTree->digiSampleIndex[sample] > LDG_PK_Cut1 && DataTree->digiSampleIndex[sample] < LDG_PK_Cut2)
+      if (DataTree->digiSampleIndex[sample] > LDG_PK_Cut1 && DataTree->digiSampleIndex[sample] < LDG_PK_Cut2)
         Peak_integral[DataTree->digiChannel[sample]][0] +=
           (Background_avg[DataTree->digiChannel[sample]] - DataTree->digiSampleValue[sample]);
 
-      else if (DataTree->digiSampleIndex[sample] > SCND_PK_Cut1 && DataTree->digiSampleIndex[sample] < SCND_PK_Cut2)
+      if (DataTree->digiSampleIndex[sample] > SCND_PK_Cut1 && DataTree->digiSampleIndex[sample] < SCND_PK_Cut2)
         Peak_integral[DataTree->digiChannel[sample]][1] += 
           (Background_avg[DataTree->digiChannel[sample]] - DataTree->digiSampleValue[sample]);
 
@@ -208,6 +219,12 @@ int main (int argc, char** argv)
 
       }
 
+      // Loop over each TS for a channel and write to .txt file:
+      for (Int_t TS = 0; TS < maxTS; TS++){
+	CH_txt[CH] << Signal[CH][TS] << " ";
+      }// End of loop over TS for a CH .txt file
+      CH_txt[CH] << "\n";
+
     }// End loop over channels
 
   }// End loop over events
@@ -240,6 +257,7 @@ int main (int argc, char** argv)
     }
 
     CH_hist->Write();
+    CH_txt[CH].close();
     CH++;
 
   }// End loop over pulse plots
