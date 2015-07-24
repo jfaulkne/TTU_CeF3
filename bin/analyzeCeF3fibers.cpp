@@ -56,7 +56,7 @@ int main (int argc, char** argv)
   TFile* outROOT = TFile::Open((string("output/")+outputFile).c_str(),"recreate");
   outROOT->cd();
 
-  set<string> CH_hist_Set, CH_hist_2d_Set, CH_hist_Pulse_Set, CH_hist_Integrals_Set;
+  set<string> CH_hist_Set, CH_hist_2d_Set, CH_hist_Pulse_Set, CH_hist_Integrals_Set, CH_hist_TS_Set;
 
   Int_t maxTS = 1000;
   Int_t maxCH = 9;
@@ -104,9 +104,9 @@ int main (int argc, char** argv)
     Double_t Peak_integral[maxCH][2];
 
     Int_t Npeaks[maxCH];
-    bool Triggered[maxCH][2];
+    Int_t Triggered[maxCH][2];
     for (Int_t CH = 0; CH < maxCH; CH++){
-      Npeaks[CH] = 0; Triggered[CH][0] = false; Triggered[CH][1] = false;
+      Npeaks[CH] = 0; Triggered[CH][0] = -999; Triggered[CH][1] = -999;
       Background_avg[CH] = 0; Peak_integral[CH][0] = 0; Peak_integral[CH][1] = 0;
     }
 
@@ -115,9 +115,11 @@ int main (int argc, char** argv)
 
       if (DataTree->digiGroup[sample] != 0) continue;
       if (DataTree->digiSampleIndex[sample] >= maxTS) continue;
-      if (DataTree->digiSampleValue[sample] < peaks_threshold) Triggered[DataTree->digiChannel[sample]][0] = true;
-      if (DataTree->digiSampleIndex[sample] < TRG_cut && Triggered[DataTree->digiChannel[sample]][0])
-        Triggered[DataTree->digiChannel[sample]][1] = true;
+      if (DataTree->digiSampleValue[sample] < peaks_threshold && Triggered[DataTree->digiChannel[sample]][0] == -999)
+        Triggered[DataTree->digiChannel[sample]][0] = DataTree->digiSampleIndex[sample];
+      if (DataTree->digiSampleIndex[sample] < TRG_cut && Triggered[DataTree->digiChannel[sample]][0] > -999 &&
+        Triggered[DataTree->digiChannel[sample]][1])
+          Triggered[DataTree->digiChannel[sample]][1] = DataTree->digiSampleIndex[sample];
 
       TH1F* CH_hist = 0;
       string histName = inputFile.substr(inputFile.find("Run"),inputFile.find(".root")-inputFile.find("Run"));
@@ -201,16 +203,36 @@ int main (int argc, char** argv)
 
       }
 
-      if (Triggered[CH][0] && Triggered[CH][1]){
+      TH1F* CH_hist_TS = 0;
+      string histName_TS = inputFile.substr(inputFile.find("Run"),inputFile.find(".root")-inputFile.find("Run"));
+      histName_TS += "_Channel"+IntToString(CH)+"_FirstBreak";
+
+      string histTitle_TS = histName_TS + ";Event";
+      CH_hist_TS = (TH1F*)gDirectory->GetList()->FindObject(histName_TS.c_str());
+      if (!CH_hist_TS){
+
+        CH_hist_TS = new TH1F(histName_TS.c_str(), histTitle_TS.c_str(), maxEvt, 0, maxEvt);
+        CH_hist_TS->GetYaxis()->SetTitle("Threshold Break TS");
+        CH_hist_TS->Sumw2();
+        CH_hist_TS_Set.insert(histName_TS);
+
+      }
+
+      if (Triggered[CH][0] > -999 && Triggered[CH][1] > -999){
 
         Npeaks[CH] = 2;
         CH_hist_Int->Fill(Peak_integral[CH][1], Peak_integral[CH][0]);
 
-      } else if (Triggered[CH][0] || Triggered[CH][1]) Npeaks[CH] = 1;
+      } else if (Triggered[CH][0] > -999){
+
+        Npeaks[CH] = 1;
+        CH_hist_TS->SetBinContent((Int_t)jentry, Triggered[CH][0]);
+
+      }
 
       CH_hist->Fill(Npeaks[CH]);
 
-      if (CH_hist->GetBinContent(3) < maxPlot && Triggered[CH][1]){
+      if (CH_hist->GetBinContent(3) < maxPlot && Triggered[CH][1] > -999){
 
         TGraph* CH_pulse = new TGraph(maxTS, &TimeSlice[CH][0], &Signal[CH][0]);
         CH_pulse->SetName(Form("CH%d",CH));
@@ -236,6 +258,8 @@ int main (int argc, char** argv)
   for (set<string>::const_iterator itr = CH_hist_2d_Set.begin(); itr != CH_hist_2d_Set.end(); ++itr)
     gDirectory->GetList()->FindObject(itr->c_str())->Write();
   for (set<string>::const_iterator itr = CH_hist_Integrals_Set.begin(); itr != CH_hist_Integrals_Set.end(); ++itr)
+    gDirectory->GetList()->FindObject(itr->c_str())->Write();
+  for (set<string>::const_iterator itr = CH_hist_TS_Set.begin(); itr != CH_hist_TS_Set.end(); ++itr)
     gDirectory->GetList()->FindObject(itr->c_str())->Write();
   for (set<string>::const_iterator itr = CH_hist_Pulse_Set.begin(); itr != CH_hist_Pulse_Set.end(); ++itr){
 
